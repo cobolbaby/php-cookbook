@@ -1,0 +1,5 @@
+{
+    "require-dev": {
+        "psecio/iniscan": "^3.6"
+    }
+}
