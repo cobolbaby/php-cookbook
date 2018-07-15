@@ -1,5 +1,11 @@
 {
     "require-dev": {
         "psecio/iniscan": "^3.6"
+    },
+    "repositories": {
+        "packagist": {
+            "type": "composer",
+            "url": "https://packagist.phpcomposer.com"
+        }
     }
 }
