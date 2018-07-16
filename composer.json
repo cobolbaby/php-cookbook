@@ -1,4 +1,7 @@
 {
+    "require": {
+        "monolog/monolog": "^1.23"
+    },
     "require-dev": {
         "psecio/iniscan": "^3.6"
     },
@@ -6,6 +9,11 @@
         "packagist": {
             "type": "composer",
             "url": "https://packagist.phpcomposer.com"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+           "cobolphp\\": "framework/src/"
         }
     }
 }

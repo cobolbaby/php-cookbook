@@ -1,9 +1,29 @@
 ## 1.0 实现目标
 
-## 2.0 玩转技巧
+总结一些开发经验，帮助和自己有着同样经历的同学不断成长
+
+## 2.0 玩转技巧
 
 ### 2.1 **non-blocking IO**
+
+- **使用场景:**
+
+常见于Webhook的实现中
+
+- **代码片段**
+
+> framework/src/Request.class.php
+
 ### 2.2 **Promise**
+
+- **使用场景:**
+
+常见于Webhook的实现中
+
+- **代码片段**
+
+> framework/src/Request.class.php
+
 ### 2.3 **Redis pipeline**
 ### 2.4 **AMQP**
 ### 2.5 **MySQL BatchInsert**
