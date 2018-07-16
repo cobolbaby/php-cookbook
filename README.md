@@ -30,6 +30,17 @@
 
 ### 2.3 **Redis pipeline**
 
+- **相关简介:**
+
+    
+
+- **使用场景:**
+
+    并发获取资源
+
+- **代码片段**
+
+    > framework/src/Request.class.php
 
 ### 2.4 **AMQP**
 ### 2.5 **MySQL BatchInsert**
