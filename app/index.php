@@ -24,11 +24,11 @@ $loglevel = defined('RUN_MODE') && RUN_MODE === 'production' ? Logger::NOTICE : 
 $logger   = new Logger('cobolphp');
 $logger->pushHandler(new StreamHandler(LOG_PATH . '/access.log', $loglevel));
 
-// 非阻塞请求
+// 1. non-blocking Request
 $request  = new \cobolphp\Request($logger);
 $request->asyncRequest('http://localhost:8008');
 
-// Promise
+// 2. Promise
 $handlerStack = HandlerStack::create();
 $handlerStack->push(Middleware::log($logger, new MessageFormatter(MessageFormatter::DEBUG)));
 
@@ -51,3 +51,4 @@ for ($i = 0; $i < 10; ++$i) {
     $promises[] = $promise;
 }
 Promise\all($promises)->wait();
+// all与wrap之间有何区别
