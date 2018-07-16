@@ -1,6 +1,7 @@
 {
     "require": {
-        "monolog/monolog": "^1.23"
+        "monolog/monolog": "^1.23",
+        "guzzlehttp/guzzle": "^6.3"
     },
     "require-dev": {
         "psecio/iniscan": "^3.6"

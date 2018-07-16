@@ -1,0 +1,7 @@
+{
+    "name": "cobolphp/framework",
+    "description": "Strive to break through",
+    "dependencies": {
+        "sleep-async": "^1.0.5"
+    }
+}

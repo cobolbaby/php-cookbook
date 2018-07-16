@@ -8,23 +8,29 @@
 
 - **使用场景:**
 
-常见于Webhook的实现中
+    消息推送，但不考虑结果状态
 
 - **代码片段**
 
-> framework/src/Request.class.php
+    > framework/src/Request.class.php
 
 ### 2.2 **Promise**
 
+- **相关简介:**
+
+    
+
 - **使用场景:**
 
-常见于Webhook的实现中
+    并发获取资源
 
 - **代码片段**
 
-> framework/src/Request.class.php
+    > framework/src/Request.class.php
 
 ### 2.3 **Redis pipeline**
+
+
 ### 2.4 **AMQP**
 ### 2.5 **MySQL BatchInsert**
 ### 2.6 **Deamon Process**
