@@ -4,7 +4,8 @@
         "guzzlehttp/guzzle": "^6.3"
     },
     "require-dev": {
-        "psecio/iniscan": "^3.6"
+        "psecio/iniscan": "^3.6",
+        "phpunit/phpunit": "^5.7"
     },
     "repositories": {
         "packagist": {
