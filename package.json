@@ -2,6 +2,8 @@
     "name": "cobolphp/framework",
     "description": "Strive to break through",
     "dependencies": {
+        "gulp": "^3.9.1",
+        "gulp-apidoc": "^0.2.8",
         "sleep-async": "^1.0.5"
     }
 }

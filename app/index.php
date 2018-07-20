@@ -51,4 +51,3 @@ for ($i = 0; $i < 10; ++$i) {
     $promises[] = $promise;
 }
 Promise\all($promises)->wait();
-// all与wrap之间有何区别
