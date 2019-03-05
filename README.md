@@ -1,115 +1,4 @@
-
-Table of Contents
-=================
-
-   * [目录](#目录)
-      * [编写目标](#编写目标)
-      * [基础须知](#基础须知)
-      * [奇淫巧技](#奇淫巧技)
-         * [1) MySQL](#1-mysql)
-            * [1.1) 批量插入](#11-批量插入)
-            * [1.2) 容量估算](#12-容量估算)
-            * [1.3) 连接池](#13-连接池)
-            * [1.4) 长连接](#14-长连接)
-            * [1.5) 读写分离](#15-读写分离)
-            * [1.6) Proxy](#16-proxy)
-            * [1.7) 分库分表分区](#17-分库分表分区)
-            * [1.8) 严格模式](#18-严格模式)
-            * [1.9) 查询大小写不敏感](#19-查询大小写不敏感)
-            * [1.10) ORM](#110-orm)
-            * [1.11) 事务](#111-事务)
-            * [1.12) 存储过程](#112-存储过程)
-            * [1.13) 视图的价值](#113-视图的价值)
-            * [1.14) 死锁](#114-死锁)
-            * [1.15) Online DDL](#115-online-ddl)
-            * [1.16) 小表驱动大表](#116-小表驱动大表)
-            * [1.17) 分组聚合](#117-分组聚合)
-            * [1.18) 范围查询](#118-范围查询)
-            * [1.19) 分页查询](#119-分页查询)
-            * [1.20) 左前缀原则](#120-左前缀原则)
-            * [1.21) 覆盖索引](#121-覆盖索引)
-            * [1.22) 精度损失](#122-精度损失)
-         * [2) 异步处理](#2-异步处理)
-            * [2.1) Promises/A ](#21-promisesa)
-            * [2.2) MQ](#22-mq)
-            * [2.3) ...](#23-)
-         * [3) Redis](#3-redis)
-            * [3.1) Redis管道](#31-redis管道)
-            * [3.2) Session共享](#32-session共享)
-            * [3.3) Cache-Aside](#33-cache-aside)
-            * [3.4) 计数器](#34-计数器)
-            * [3.5) 队列](#35-队列)
-            * [3.6) Redis Cluster](#36-redis-cluster)
-            * [3.7) 随机过期](#37-随机过期)
-            * [3.8) Memcached优势](#38-memcached优势)
-         * [4) 微服务化](#4-微服务化)
-            * [4.1) 服务注册发现](#41-服务注册发现)
-            * [4.2) 服务治理](#42-服务治理)
-            * [4.3) Service Mesh](#43-service-mesh)
-            * [4.4) 注册中心](#44-注册中心)
-         * [5) 按需加载](#5-按需加载)
-            * [5.1) Composer](#51-composer)
-         * [6) 文件上传](#6-文件上传)
-            * [6.1) 分片上传](#61-分片上传)
-            * [6.2) 流式上传](#62-流式上传)
-            * [6.3) 常见漏洞](#63-常见漏洞)
-            * [6.4) Ceph](#64-ceph)
-            * [6.5) Aliyun OSS](#65-aliyun-oss)
-            * [6.6) checksum](#66-checksum)
-         * [7) 并发编程](#7-并发编程)
-            * [7.1) 多线程](#71-多线程)
-            * [7.2) 多进程](#72-多进程)
-            * [7.3) 协程](#73-协程)
-            * [7.4) 守护进程](#74-守护进程)
-            * [7.5) 锁](#75-锁)
-            * [7.6) 共享内存](#76-共享内存)
-            * [7.7) 信号量](#77-信号量)
-         * [8) 内存使用](#8-内存使用)
-            * [8.1) 迭代器](#81-迭代器)
-            * [8.2) 引用](#82-引用)
-         * [9) 排序算法](#9-排序算法)
-         * [10) 安防](#10-安防)
-            * [10.1) IP白名单](#101-ip白名单)
-            * [10.2) 检测敏感词](#102-检测敏感词)
-            * [10.3) Nginx限速](#103-nginx限速)
-            * [10.4) CDN](#104-cdn)
-            * [10.5) 服务器杀软](#105-服务器杀软)
-            * [10.6) WAF](#106-waf)
-            * [10.7) 硬件防火墙](#107-硬件防火墙)
-            * [10.8) Cobra](#108-cobra)
-            * [10.9) TP框架漏洞](#109-tp框架漏洞)
-            * [10.10) 防SQL注入](#1010-防sql注入)
-         * [11) 搜索](#11-搜索)
-            * [11.1) Sphinx vs Elasticsearch vs Solr](#111-sphinx-vs-elasticsearch-vs-solr)
-            * [11.2) 纯真IP地址库](#112-纯真ip地址库)
-            * [11.3) 二叉搜索树(BST)](#113-二叉搜索树bst)
-            * [11.4) 平衡二叉树(AVL)](#114-平衡二叉树avl)
-            * [11.5) B Tree/B-Tree](#115-btreeb-tree)
-         * [12) 页面静态化](#12-页面静态化)
-         * [13) 分布式](#13-分布式)
-            * [13.1) Zookeeper分布式过程协同](#131-zookeeper分布式过程协同)
-         * [14) Session &amp; Cookie](#14-session--cookie)
-         * [15) 城市分站](#15-城市分站)
-         * [16) 日志管理](#16-日志管理)
-         * [17) 插件机制](#17-插件机制)
-         * [18) 视图渲染](#18-视图渲染)
-            * [18.1) DocumentFragment](#181-documentfragment)
-         * [19) 统计代码行数](#19-统计代码行数)
-         * [20) apiDoc](#20-apidoc)
-         * [21) Grammar](#21-grammar)
-            * [21.1) ob_clean](#211-ob_clean)
-            * [21.2) array_unique](#212-array_unique)
-            * [21.3) getallheaders](#213-getallheaders)
-            * [21.4) md5](#214-md5)
-            * [21.5) json_encode](#215-json_encode)
-            * [21.6) pdo](#216-pdo)
-            * [21.7) 浮点数计算](#217-浮点数计算)
-            * [21.8) PDO vs mysqli vs mysql](#218-pdo-vs-mysqli-vs-mysql)
-            * [21.9) mysql_unbuffered_query](#219-mysql_unbuffered_query)
-            * [21.10) spl_autoload_register](#2110-spl_autoload_register)
-            * [21.11) session_set_save_handler](#2111-session_set_save_handler)
-         * [22) 硬件选型](#22-硬件选型)
-      * [参考](#参考)
+[TOC]
 
 # 目录
 
@@ -117,11 +6,265 @@ Table of Contents
 
 搞PHP也5年了，算是有一些大型项目的开发经验，做个分享希望可以帮助到一些有点迷茫的同学，同时接受各方的批评和指点。
 
+## 每日一题
+
+试试手，看看自己能hold住吗？
+
+- [TiNODE](https://t.ti-node.com/question)
+- [四角猫](https://www.sijiaomao.com/exams)
+
 ## 基础须知
 
 需要了解5.x版本每次升级主要新增了哪些特性，有利于我们写出更优雅的代码。
 
-## 奇淫巧技
+### 1) 版本差异
+
+PHP5.6升级PHP7的负担有哪些？
+
+[日请求亿级的QQ会员AMS平台PHP7升级实践](
+https://www.webfalse.com/read/201768/11898426.html)
+
+### 2) 常见函数
+
+#### 2.1) ob_clean
+
+二维码输出显示问题
+
+#### 2.2) array_unique
+
+[Remove duplicate items from an array](https://stackoverflow.com/questions/5036403/remove-duplicate-items-from-an-array)
+
+#### 2.3) getallheaders
+
+存在平台兼容性问题，同时我们也要注意自定义请求头潜在的问题。
+
+[getallheaders无法获取自定义头的问题](http://www.01happy.com/php-getallheaders-get-user-defined-headers/)
+
+#### 2.4) md5
+
+PHP在处理字符串时，会利用"!="或"=="来对哈希值进行比较，它把每一个以”0E”开头的哈希值都解释为0，所以如果两个不同的密码经过哈希以后，其哈希值都是以”0E”开头的，那么PHP将会认为他们相同，都是0。
+
+```
+QNKCDZO
+0e830400451993494058024219903391
+  
+s878926199a
+0e545993274517709034328855841020
+  
+s155964671a
+0e342768416822451524974117254469
+  
+s214587387a
+0e848240448830537924465865611904
+  
+s214587387a
+0e848240448830537924465865611904
+  
+s878926199a
+0e545993274517709034328855841020
+  
+s1091221200a
+0e940624217856561557816327384675
+  
+s1885207154a
+0e509367213418206700842008763514
+  
+s1502113478a
+0e861580163291561247404381396064
+  
+s1885207154a
+0e509367213418206700842008763514
+  
+s1836677006a
+0e481036490867661113260034900752
+  
+s155964671a
+0e342768416822451524974117254469
+  
+s1184209335a
+0e072485820392773389523109082030
+  
+s1665632922a
+0e731198061491163073197128363787
+  
+s1502113478a
+0e861580163291561247404381396064
+  
+s1836677006a
+0e481036490867661113260034900752
+  
+s1091221200a
+0e940624217856561557816327384675
+  
+s155964671a
+0e342768416822451524974117254469
+  
+s1502113478a
+0e861580163291561247404381396064
+  
+s155964671a
+0e342768416822451524974117254469
+  
+s1665632922a
+0e731198061491163073197128363787
+  
+s155964671a
+0e342768416822451524974117254469
+  
+s1091221200a
+0e940624217856561557816327384675
+  
+s1836677006a
+0e481036490867661113260034900752
+  
+s1885207154a
+0e509367213418206700842008763514
+  
+s532378020a
+0e220463095855511507588041205815
+  
+s878926199a
+0e545993274517709034328855841020
+  
+s1091221200a
+0e940624217856561557816327384675
+  
+s214587387a
+0e848240448830537924465865611904
+  
+s1502113478a
+0e861580163291561247404381396064
+  
+s1091221200a
+0e940624217856561557816327384675
+  
+s1665632922a
+0e731198061491163073197128363787
+  
+s1885207154a
+0e509367213418206700842008763514
+  
+s1836677006a
+0e481036490867661113260034900752
+  
+s1665632922a
+0e731198061491163073197128363787
+  
+s878926199a
+0e545993274517709034328855841020
+```
+
+#### 2.5) json_encode
+
+空字典json序列化成了[]
+
+#### 2.6) mysqli query
+
+**查询时大写的字段名称被转化成了小写**
+
+**查询时整型的字段转化成了字符串**
+
+需要注意用PHP查询数据库得到的数据类型与数据库中存储的未必一致。[PHP从MySQL取出int数据，变成了string](http://www.druidcoder.cn/2016/05/10/mysql-driver/)，所以在编写API接口的时候，一定要添加如下设置:
+
+```
+$mysqli->options(MYSQLI_OPT_INT_AND_FLOAT_NATIVE, 1); 
+```
+
+#### 2.7) Floating point precision
+
+[Float 浮点型](http://php.net/manual/zh/language.types.float.php)
+
+php提供了高精度计算的函数库，实际上就是为了解决这个浮点数计算问题而生的。
+
+#### 2.8) prepared statements
+
+SQL预处理能力提高了安全性以及执行效率。
+
+执行效率高主要体现在预处理语句上，和常规编写的SQL最重要区别是，常规情况下每次都需要传递整条语句，且都会解析，而预处理只解析一次，后续客户端只传递参数就好，减少了多次解析SQL的损耗，所以执行效率更高。
+
+安全性这一点，也是体现在预处理语句上，预处理语句在传递绑定参数的时候，无论变量参数是什么内容，即使变量参数本身就是一句SQL，也只是当做字符串来处理，这样就大大的降低了数据库SQL注入的危险。
+
+#### 2.9) mysql_unbuffered_query
+
+mysql_unbuffered_query 是基于迭代器实现的吗？为什么在内存利用上会更好？
+
+参见: [Buffered and Unbuffered queries](http://php.net/manual/en/mysqlinfo.concepts.buffering.php)
+
+#### 2.10) Trait
+
+自 PHP 5.4.0 起，PHP 实现了一种代码复用的方法，称为 trait。
+
+Trait 是为类似 PHP 的单继承语言而准备的一种代码复用机制。Trait 为了减少单继承语言的限制，使开发人员能够自由地在不同的类中复用 method。
+
+#### 2.11) session_set_save_handler
+
+自定义会话处理机制
+
+#### 2.12) array_map
+
+一句话删除文件目录
+
+```php
+array_map('unlink', glob('*'));
+```
+
+但上述方式未必最好，该方法还是串行执行
+
+怎么并行起来呢？
+
+#### 2.13) urlencode
+
+如果参数中带有"+"，会有什么影响？GET方式传参一定要注意。
+
+“+”号是一个提交的变量分隔符，php会自动把他用空格替换了，所以一定要提交前进行转义。
+
+#### 2.14) ORM
+
+ORM(Object Relational Mapping)到底是个啥？怎么理解对象关系映射？
+
+ORM可以拆分为两部分理解，O以及RM，即对象以及关系映射。ORM Lib的作用就是将 对象 与 数据库表结构 进行映射关联，从而实现操控对象就是操控数据库中数据记录。
+
+**优缺点**
+
+- 直接拼写SQL会有以下几个问题：
+    - 每条SQL语句都需要指明表的前缀
+    - SQL语句复杂时，极易出现编写错误的情况
+- ORM的优势：
+    - 操纵对象相当于操控数据记录，较易规避问题
+
+### 3) SPL
+
+#### 3.1) ArrayIterator
+
+相比于Array，好处在于不需要生成一个数组。
+
+#### 3.2) SplFixedArray
+
+[定长数组](https://wiki.swoole.com/wiki/page/634.html)
+
+[SplFixedArray效能测试](https://ithelp.ithome.com.tw/articles/10194418)
+
+#### 3.3) SplHeap
+
+[堆](https://wiki.swoole.com/wiki/page/879.html)
+
+#### 3.4) SplQueue
+
+[队列](https://wiki.swoole.com/wiki/page/507.html)
+
+#### 3.5) spl_autoload_register
+
+If your code has an existing __autoload() function then this function must be explicitly registered on the __autoload queue. 
+ 
+If there must be multiple autoload functions, spl_autoload_register() allows for this. It effectively creates a queue of autoload functions, and runs through each of them in the order they are defined. By contrast, __autoload() may only be defined once.
+
+#### 3.6) SplFileObject
+
+PHP读取和解析大文件
+
+## 周边技术
+
+内含各种奇淫巧技 :)
 
 ### 1) MySQL
 
@@ -146,8 +289,9 @@ ALTER TABLE 表名 ENABLE KEYS;
 
 计算数据库中各个表的数据量和每行记录所占用空间
 
-- http://www.cnblogs.com/yzwdli/p/5337881.html
-- http://itindex.net/detail/39281-%E6%95%B0%E6%8D%AE%E5%BA%93-%E5%AE%B9%E9%87%8F-%E6%80%A7%E8%83%BD
+[计算数据库中各个表的数据量和每行记录所占用空间](http://www.cnblogs.com/yzwdli/p/5337881.html)
+
+[谈数据库容量和性能测算](http://itindex.net/detail/39281-%E6%95%B0%E6%8D%AE%E5%BA%93-%E5%AE%B9%E9%87%8F-%E6%80%A7%E8%83%BD)
 
 #### 1.3) 连接池
 
@@ -162,6 +306,9 @@ ALTER TABLE 表名 ENABLE KEYS;
 利用框架级别实现还是用中间件实现？各有什么优缺点？
 
 除了业务读写分离，最重要的反倒是如何保障主从之间的同步
+
+- 半同步复制
+- GTID
 
 #### 1.6) Proxy
 
@@ -191,7 +338,7 @@ ALTER TABLE 表名 ENABLE KEYS;
 
 - 分区
 
-那数据库分区与分库分表的区别？逻辑代码可以不做修改吗？
+[如何理解MySQL的表分区？](http://blog.sijiaomao.com/?p=1592)
 
 #### 1.8) 严格模式
 
@@ -209,23 +356,23 @@ ALTER TABLE 表名 ENABLE KEYS;
     在`[mysqld]`下查找`sql-mode`，将此行修改成为: 
 `sql-mode="STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION"`，推荐第二种方法，可以一劳永逸。
 
-#### 1.9) 查询大小写不敏感
+#### 1.9) 编码字符集
 
-主要是字符集设置问题，在处理具体业务的时候一定要明确自己想要的。
+字符集的选择直接影响着SQL查询时大小写是否敏感的问题。
 
-#### 1.10) ORM
+而关于编码需要留意一个配置`skip-character-set-client-handshake`，启用选项后，可以避免客户端程序误操作（使用其他字符集连接进来并写入数据，从而引发乱码的问题）
 
-ORM(Object Relational Mapping)到底是个啥？怎么理解对象关系映射？
+#### 1.10) 字段类型
 
-ORM可以拆分为两部分理解，O以及RM，即对象以及关系映射。ORM Lib的作用就是将 对象 与 数据库表结构 进行映射关联，从而实现操控对象就是操控数据库中数据记录。
+ip/time/enum/money/汉字
 
-**优缺点**
+如何存储`IP`，`Money`以及`DATETIME`类型数据
 
-- 直接拼写SQL会有以下几个问题：
-    - 每条SQL语句都需要指明表的前缀
-    - SQL语句复杂时，极易出现编写错误的情况
-- ORM的优势：
-    - 操纵对象相当于操控数据记录，较易规避问题
+[VARCHAR(50)最多能存多少个汉字](https://zhidao.baidu.com/question/1368150009483131619.html)
+
+[枚举类型ENUM](https://dev.mysql.com/doc/refman/5.6/en/enum.html) 是非常快和紧凑的。实际上，其保存为TINYINT，只是其表面上显示为字符串。看起来用这个字段来做一些选项列表变得相当的完美。 但有哪些潜在的坑呢
+
+弱类型语言在执行SQL插入的时候枚举值没有引号可能有问题，尤其对于新手；并且对于0/''/NULL等值要特别留意，不然会出现意外。
 
 #### 1.11) 事务
 
@@ -235,9 +382,15 @@ ORM可以拆分为两部分理解，O以及RM，即对象以及关系映射。OR
 
 #### 1.12) 存储过程
 
-存储过程的价值体现在哪？为什么需要存储过程？
+存储过程的价值体现在哪？为什么需要存储过程？在分布式数据库中存储过程在哪执行调用？
 
-#### 1.13) 视图的价值
+#### 1.13) 视图
+
+视图的价值
+- 面向不同角色用户，访问不同的视图，方便做权限管理，对数据安全性要求很高的公司必须要考虑的 
+- 简化上层业务逻辑，底层表结构对上层近乎透明，DBA做表结构调整时对上层业务代码没有影响，尤其是当一套数据被多个业务子系统共享时，此问题尤为明显。
+
+不过以上情况更通常采用服务化的路子解决。
 
 #### 1.14) 死锁
 
@@ -257,11 +410,17 @@ ORM可以拆分为两部分理解，O以及RM，即对象以及关系映射。OR
     - 被驱动集合建索引
     - innodb_buffer_pool_size
 
+- not in
+
+    not in 不会用到索引，那咋办？可以考虑用 `union`/`not exists`/`left join` 替代
+
 #### 1.17) 分组聚合
 
-如何优化聚合的执行效率
+分组聚合的本质就是先排序后聚合，所以一定要利用好索引的左前缀原则，避免生成不必要的临时表。
 
 #### 1.18) 范围查询
+
+`between`，` <`，`>` 的优化主要是利用B+Tree的特性。
 
 #### 1.19) 分页查询
 
@@ -325,6 +484,30 @@ mysql> explain select * from ocenter_verify where type = 'mobile' and verify = '
 
 浮点类型常见问题，所有的语言貌似都存在此类问题。
 
+#### 1.23) 自增主键
+
+分布式或分部分表之后，自增主键有没有必要？如果有必要又该如何维护该信息？
+
+#### 1.24) 预编译
+
+[MySQL · 特性分析 · MySQL的预编译功能](http://mysql.taobao.org/monthly/2018/04/07/)
+
+#### 1.25) 重建索引
+
+[Rebuilding or Repairing Tables or Indexes](https://dev.mysql.com/doc/refman/5.6/en/rebuilding-tables.html)
+
+#### 1.26) 关联表更新
+
+UPDATE SET FROM 将某表的一列替换为其他表的某一列
+
+#### 1.27) 临时表
+
+[MySQL · 特性分析 · 内部临时表](http://mysql.taobao.org/monthly/2016/06/07/)
+
+外部临时表存储在内存还是磁盘？哪些操作会产生内部临时表？而如何内存临时表的数据存储在磁盘的话，磁盘IO可想而知。
+
+子查询/ORDER BY/GROUP BY/DISTINCT/UNION 以上操作可能会创建。。。
+
 ### 2) 异步处理
 
 是不是你已厌烦了PHP的同步阻塞IO，那就来看一下利用PHP如何实现原生的非阻塞吧，保证让你有一种恍然大悟的赶脚。
@@ -377,7 +560,9 @@ PHP如何将会话信息保存到Redis呢？有必要了解一下session_set_sav
 
 防雪崩
 
-#### 3.8) Memcached优势
+#### 3.8) 排名
+
+有序集合 zset
 
 ### 4) 微服务化
 
@@ -397,6 +582,8 @@ PHP如何将会话信息保存到Redis呢？有必要了解一下session_set_sav
 
 ### 6) 文件上传
 
+获取上传文件大小，如果超过2G的话怎么办?
+
 #### 6.1) 分片上传
 
 如何分片以及如何合并分片
@@ -415,6 +602,8 @@ PHP如何将会话信息保存到Redis呢？有必要了解一下session_set_sav
 
 #### 6.6) checksum
 
+#### 6.7) 超大文件解析
+
 ### 7) 并发编程
 
 #### 7.1) 多线程
@@ -427,6 +616,7 @@ PHP如何将会话信息保存到Redis呢？有必要了解一下session_set_sav
 
 #### 7.3) 协程
 
+如何使用yeild实现？
 
 #### 7.4) 守护进程
 
@@ -498,7 +688,7 @@ Web Application Firewall
 
 #### 10.8) Cobra
 
-#### 10.9) TP框架漏洞
+#### 10.9) PHP框架漏洞
 
 关注一下渗透测试，看看有没有需要修复的bug
 
@@ -530,6 +720,16 @@ foreach ($_COOKIE as $value) {
     StopAttack($value, $cookiefilter);
 }
 ```
+
+#### 10.11) 服务器文件目录权限
+
+去掉所有PHP文件可执行属性
+
+```
+find ./ -type f  -name "*.php" | xargs chmod -x
+```
+
+#### 10.12) .htaccess
 
 ### 11) 搜索
 
@@ -706,189 +906,9 @@ find ./ -type f -name "*.php" -print0 | xargs -0 wc -l
 
 相比于 `Swagger`，`apiDoc` 对注释的写法要求
 
-### 21) Grammar
 
-语法中潜在的坑
-
-#### 21.1) ob_clean
-
-二维码输出显示问题
-
-#### 21.2) array_unique
-
-[Remove duplicate items from an array](https://stackoverflow.com/questions/5036403/remove-duplicate-items-from-an-array)
-
-#### 21.3) getallheaders
-
-存在平台兼容性问题，同时我们也要注意自定义请求头潜在的问题。
-
-[getallheaders无法获取自定义头的问题](http://www.01happy.com/php-getallheaders-get-user-defined-headers/)
-
-#### 21.4) md5
-
-PHP在处理字符串时，会利用"!="或"=="来对哈希值进行比较，它把每一个以”0E”开头的哈希值都解释为0，所以如果两个不同的密码经过哈希以后，其哈希值都是以”0E”开头的，那么PHP将会认为他们相同，都是0。
-
-```
-QNKCDZO
-0e830400451993494058024219903391
-  
-s878926199a
-0e545993274517709034328855841020
-  
-s155964671a
-0e342768416822451524974117254469
-  
-s214587387a
-0e848240448830537924465865611904
-  
-s214587387a
-0e848240448830537924465865611904
-  
-s878926199a
-0e545993274517709034328855841020
-  
-s1091221200a
-0e940624217856561557816327384675
-  
-s1885207154a
-0e509367213418206700842008763514
-  
-s1502113478a
-0e861580163291561247404381396064
-  
-s1885207154a
-0e509367213418206700842008763514
-  
-s1836677006a
-0e481036490867661113260034900752
-  
-s155964671a
-0e342768416822451524974117254469
-  
-s1184209335a
-0e072485820392773389523109082030
-  
-s1665632922a
-0e731198061491163073197128363787
-  
-s1502113478a
-0e861580163291561247404381396064
-  
-s1836677006a
-0e481036490867661113260034900752
-  
-s1091221200a
-0e940624217856561557816327384675
-  
-s155964671a
-0e342768416822451524974117254469
-  
-s1502113478a
-0e861580163291561247404381396064
-  
-s155964671a
-0e342768416822451524974117254469
-  
-s1665632922a
-0e731198061491163073197128363787
-  
-s155964671a
-0e342768416822451524974117254469
-  
-s1091221200a
-0e940624217856561557816327384675
-  
-s1836677006a
-0e481036490867661113260034900752
-  
-s1885207154a
-0e509367213418206700842008763514
-  
-s532378020a
-0e220463095855511507588041205815
-  
-s878926199a
-0e545993274517709034328855841020
-  
-s1091221200a
-0e940624217856561557816327384675
-  
-s214587387a
-0e848240448830537924465865611904
-  
-s1502113478a
-0e861580163291561247404381396064
-  
-s1091221200a
-0e940624217856561557816327384675
-  
-s1665632922a
-0e731198061491163073197128363787
-  
-s1885207154a
-0e509367213418206700842008763514
-  
-s1836677006a
-0e481036490867661113260034900752
-  
-s1665632922a
-0e731198061491163073197128363787
-  
-s878926199a
-0e545993274517709034328855841020
-```
-
-#### 21.5) json_encode
-
-空字典json序列化成了[]
-
-#### 21.6) pdo
-
-**查询时大写的字段名称被转化成了小写**
-
-**查询时整型的字段转化成了字符串**
-
-需要注意用PHP查询数据库得到的数据类型与数据库中存储的未必一致。[PHP从MySQL取出int数据，变成了string](http://www.druidcoder.cn/2016/05/10/mysql-driver/)，所以在做API接口的时候，留心一下 `$mysqli->options(MYSQLI_OPT_INT_AND_FLOAT_NATIVE, 1); `。
-
-#### 21.7) 浮点数计算
-
-php提供了高精度计算的函数库，实际上就是为了解决这个浮点数计算问题而生的。
-
-#### 21.8) PDO vs mysqli vs mysql
-
-参考: [mysqli vs PDO](http://php.net/manual/en/mysqlinfo.api.choosing.php)
-
-PDO 提供了一个 数据访问 抽象层，这意味着，不管使用哪种数据库，都可以用相同的函数来查询和获取数据。换句话说 PDO 扩展自身并不实现任何数据库功能，只是定义了一致的接口。
-这样当遇到数据库迁移的时候，实施成本无疑会低很多。
-
-除此之外还需要知道以下两点:
-
-**SQL预处理提高了安全性以及执行效率**
-
-执行效率高主要体现在预处理语句上，MYSQL在执行SQL语句的时候是一条一条的通过服务器编译执行，而MYSQLI的预处理语句，则是把预处理语句缓存在服务器端，然后再通过绑定的参数进行处理，和MYSQL的重要区别是，MYSQL传递的是整条语句，而MYSQLI只传递参数，语句已经在服务器上准备好了。
-
-安全性较高这一点，也是体现在预处理语句上，MYSQL执行语句的时候，是把传入的变量当成SQL语句的一部分，而MYSQLI有预处理语句在传递绑定参数的时候，无论变量参数是什么内容，即使变量参数本身就是一句SQL，MYSQLI也只是当做字符串来处理，这样就大大的降低了数据库SQL注入的危险。
-
-**迭代器的实现支持读取大数据量的场景**
-
-#### 21.9) mysql_unbuffered_query
-
-mysql_unbuffered_query 是基于迭代器实现的吗？为什么在内存利用上会更好？
-
-参见: [Buffered and Unbuffered queries](http://php.net/manual/en/mysqlinfo.concepts.buffering.php)
-
-#### 21.10) spl_autoload_register
-
-If your code has an existing __autoload() function then this function must be explicitly registered on the __autoload queue. 
- 
-If there must be multiple autoload functions, spl_autoload_register() allows for this. It effectively creates a queue of autoload functions, and runs through each of them in the order they are defined. By contrast, __autoload() may only be defined once.
-
-#### 21.11) session_set_save_handler
-
-自定义会话处理机制
 
 ### 22) 硬件选型
-
 
 ## 参考
 
@@ -897,10 +917,8 @@ If there must be multiple autoload functions, spl_autoload_register() allows for
 - [PHP非阻塞实现方法](https://www.awaimai.com/660.html)
 - [MySQL批量修改](https://www.awaimai.com/2103.html)
 - [WordPress Actions and Filters](https://code.tutsplus.com/articles/the-beginners-guide-to-wordpress-actions-and-filters--wp-27373)
-- [MySQL LIKE 用法：搜索匹配字段中的指定内容](http://www.php230.com/mysql-like.html)
 - [在PHP中使用协程实现多任务调度](http://www.laruence.com/2015/05/28/3038.html)
-- [PHP+MySQL导出大量数据(Iterator yield)](https://www.lbog.cn/blog/22)
 - [常见排序算法性能比较](https://www.lbog.cn/blog/39)
-- [DRDS在浙江移动的生产应用中落地](https://yq.aliyun.com/articles/591914)
-- [PHP开发异步高性能的MySQL代理服务器](http://rango.swoole.com/archives/288)
-- [PDO(MySQL驱动)查询超时设置方法](https://www.mudoom.com/blog/2017/07/30/pdo%EF%BC%88mysql%E9%A9%B1%E5%8A%A8%EF%BC%89%E6%9F%A5%E8%AF%A2%E8%B6%85%E6%97%B6%E8%AE%BE%E7%BD%AE%E6%96%B9%E6%B3%95/)
+- [PDO查询超时设置方法](https://www.mudoom.com/blog/2017/07/30/pdo%EF%BC%88mysql%E9%A9%B1%E5%8A%A8%EF%BC%89%E6%9F%A5%E8%AF%A2%E8%B6%85%E6%97%B6%E8%AE%BE%E7%BD%AE%E6%96%B9%E6%B3%95/)
+- [Choosing a MySQL PHP drivers](http://php.net/manual/en/mysqlinfo.api.choosing.php)
+- [我必须得告诉大家的MySQL优化原理](https://www.jianshu.com/p/d7665192aaaf)
