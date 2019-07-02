@@ -28,9 +28,11 @@ https://www.webfalse.com/read/201768/11898426.html)
 
 #### 2.1) ob_clean
 
-二维码输出显示问题
+phpqrcode在输出二维码可能出现显示问题，此时可以用ob_clean修正
 
 #### 2.2) array_unique
+
+一定要留意`SORT_REGULAR`参数
 
 [Remove duplicate items from an array](https://stackoverflow.com/questions/5036403/remove-duplicate-items-from-an-array)
 
@@ -218,19 +220,43 @@ array_map('unlink', glob('*'));
 
 “+”号是一个提交的变量分隔符，php会自动把他用空格替换了，所以一定要提交前进行转义。
 
-#### 2.14) ORM
+#### 2.14) stream_copy_to_stream
 
-ORM(Object Relational Mapping)到底是个啥？怎么理解对象关系映射？
+[How to Read Big Files with PHP (Without Killing Your Server)](https://www.sitepoint.com/performant-reading-big-files-php/)
 
-ORM可以拆分为两部分理解，O以及RM，即对象以及关系映射。ORM Lib的作用就是将 对象 与 数据库表结构 进行映射关联，从而实现操控对象就是操控数据库中数据记录。
+流式处理的典范
 
-**优缺点**
+#### 2.15) php://temp
 
-- 直接拼写SQL会有以下几个问题：
-    - 每条SQL语句都需要指明表的前缀
-    - SQL语句复杂时，极易出现编写错误的情况
-- ORM的优势：
-    - 操纵对象相当于操控数据记录，较易规避问题
+生成临时文件有两种办法 php://temp 与 tmpfile，你更爱哪一种？ 
+
+推荐前者，如果是小文件，则会临时存储在内存中。
+
+[Generate CSV from Array](https://css-tricks.com/snippets/php/generate-csv-from-array/)
+
+#### 2.16) nowdoc/heredoc
+
+[php针对多行文本的语法糖](http://php.net/manual/zh/language.types.string.php#language.types.string.syntax.nowdoc) 做wordpress开发就会感到很有用了。
+
+#### 2.17) iconv
+
+php iconv() 编码转换出错 `Detected an illegal character`，问题的关键在于每一种编码也是有可表示范围的。
+
+参考: [php iconv() : Detected an illegal character in input string](https://www.jb51.net/article/25528.htm)
+
+#### 2.18) filesize
+
+[filesize 超过2G文件信息错误处理](https://chenxuehu.com/article/2016/08/5540.html) 没啥实际业务，仅作了解
+
+#### 2.19) phpredis 和 predis
+
+[phpredis 和 predis 使用区别](https://learnku.com/articles/7259/phpredis-and-predis)
+
+#### 2.20) 线程安全
+
+[What does thread safety mean when downloading PHP?](http://php.net/manual/en/faq.obtaining.php#faq.obtaining.threadsafety)
+
+[What is thread safe or non-thread safe in PHP?](https://stackoverflow.com/questions/1623914/what-is-thread-safe-or-non-thread-safe-in-php)
 
 ### 3) SPL
 
@@ -508,6 +534,47 @@ UPDATE SET FROM 将某表的一列替换为其他表的某一列
 
 子查询/ORDER BY/GROUP BY/DISTINCT/UNION 以上操作可能会创建。。。
 
+#### 1.28) 对象关系模型
+
+ORM(Object Relational Mapping)到底是个啥？怎么理解对象关系映射？
+
+ORM可以拆分为两部分理解，O以及RM，即对象以及关系映射。ORM Lib的作用就是将 对象 与 数据库表结构 进行映射关联，从而实现操控对象就是操控数据库中数据记录。
+
+**优缺点**
+
+- 直接拼写SQL会有以下几个问题：
+    - 每条SQL语句都需要指明表的前缀
+    - SQL语句复杂时，极易出现编写错误的情况
+- ORM的优势：
+    - 操纵对象相当于操控数据记录，较易规避问题
+
+#### 1.29) 缓解主从复制延迟的方法
+
+1. 高速网络
+2. 从库SSD
+3. 降低从库负载，使用多个从库
+4. 严格要求一致性的，不要查从库
+
+#### 1.30) 索引长度与区分度
+
+column列也可以增设索引长度，column(index_length)列索引长度
+
+```sql
+ALTER TABLE index7 ADD INDEX index7_name(name(20));
+```
+
+区分度计算:
+
+```sql
+select count(distinct left(word,6))/count(id) from tb_name where 1; 
+```
+
+目标是用最小的空间尽可能提高索引的效率。
+
+#### 1.31) 当字段名与MySQL保留字冲突的解决办法
+
+加上反引号 ` , 不过最好是在建表的时候就注意到这一点。
+
 ### 2) 异步处理
 
 是不是你已厌烦了PHP的同步阻塞IO，那就来看一下利用PHP如何实现原生的非阻塞吧，保证让你有一种恍然大悟的赶脚。
@@ -528,15 +595,11 @@ AMQP（Advanced Message Queuing Protocol），一个标准的高级消息队列�
 
 ### 3) Redis
 
-#### 3.1) Redis管道
+#### 3.1) 管道
 
-如果对 `Redis` 进行批量操作的话，管道是一个很好的选择。与 `单一操作Key` 相比，其性能有了大幅的提升，主要是因为 `TCP` 连接中减少"交互往返"的时间。此时你是否会想到另外两个批量操作的命令 `mset` 以及 `mget` ，它们和 `pipeline`分别用在什么场景下呢？好奇的同学不妨一探究竟。
+如果对 `Redis` 进行批量操作的话，[管道](https://blog.51cto.com/phpme/2136827) 是一个很好的选择。与 `单一操作Key` 相比，其性能有了大幅的提升，主要是因为 `TCP` 连接中减少"交互往返"的时间。此时你是否会想到另外两个批量操作的命令 `mset` 以及 `mget` ，它们和 `pipeline`有没有关系？又分别用在什么场景下。比如缓存群组用户的基本信息。
 
-**场景:**
-
-批量操作 `Redis` 中的键值，如缓存用户列表的信息
-
-#### 3.2) Session共享
+#### 3.2) Session存储
 
 横向扩展的前提是多实例间共享会话信息，而用Reids就可以统一维护会话信息。
 
@@ -548,21 +611,55 @@ PHP如何将会话信息保存到Redis呢？有必要了解一下session_set_sav
 
 #### 3.4) 计数器
 
-#### 3.5) 队列
+请求限速，删减库存
 
-#### 3.6) Redis Cluster
+#### 3.5) List
 
-首先需要了解请求Redis Cluster的执行过程，方便问题定位。
+如果用作消息队列，有哪些不足？比如服务稳定性，比如功能完备性。
 
-其次需要明确哪些预想的操作不能做？比如：Redis Cluster下客户端原生不支持多key操作
+当然如果一定要用，一定要留意一下，当List key执行lpop到最后的时候，该key也会被清除，实验如下:
 
-#### 3.7) 随机过期
+```bash
+redis.shujushijue.cn:6378[6]> LPUSH runoobkey redis
+(integer) 1
+redis.shujushijue.cn:6378[6]> KEYS *
+1) "runoobkey"
+2) "AUTOUPDATE_LOG_LIST"
+redis.shujushijue.cn:6378[6]> lpop runoobkey
+"redis"
+redis.shujushijue.cn:6378[6]> KEYS *
+1) "AUTOUPDATE_LOG_LIST"
+```
 
-防雪崩
+#### 3.7) 防雪崩
 
-#### 3.8) 排名
+过期时间应该加一个随机值
 
-有序集合 zset
+#### 3.8) ZSet
+
+有序集合zset除了可以实现排名之外，还可用在哪种业务场景下？延迟处理队列。
+
+#### 3.9) Redis Cluster主从切换问题
+
+部分耗时较久的操作可能引起主从异常切换。如何避免异常切换呢？业务处理的过程中哪些操作应该被严格要求禁止？
+
+#### 3.10) Rename部分管理指令后有何影响
+
+比如key *，还有config get xxx
+
+#### 3.11) Redis Cluster读写负载均衡问题
+
+[phpredis 高并发下需要关注的问题](https://barbery.me/post/2017-03-19-PHP-Summary-of-high-concurrency-issues/)
+
+#### 3.12) 批量删除Key
+
+```
+redis-cli KEYS "doctor_*" | xargs redis-cli DEL
+```
+
+#### 3.13) 分布式锁
+
+[Redis分布式锁的正确实现方式](https://www.cnblogs.com/linjiqin/p/8003838.html)
 
 ### 4) 微服务化
 
@@ -591,6 +688,9 @@ PHP如何将会话信息保存到Redis呢？有必要了解一下session_set_sav
 #### 6.2) 流式上传
 
 玩惯了Node.js的流式处理，感觉PHP处理文件上传过程中先让文件落地的方式实在是让人无奈，那有没有别的办法可以实现流式上传呢？主要是想减少本地磁盘IO
+
+- [Web API FileReader](https://developer.mozilla.org/zh-CN/docs/Web/API/FileReader)
+- [PHP流式上传和表单上传](https://www.cnblogs.com/52php/p/5675325.html) 走octet-stream上传方式
 
 #### 6.3) 常见漏洞
 
@@ -653,6 +753,14 @@ Linux操作系统的/dev/shm是什么你知道吗？
 #### 8.2) 引用
 
 php使用引用是否有那么大的好处？毕竟php底层采用写时复制实现。
+
+#### 8.3) 流式处理
+
+对buffer高效利用的体现
+
+#### 8.4) 命名管道
+
+
 
 ### 9) 排序算法
 
@@ -906,9 +1014,16 @@ find ./ -type f -name "*.php" -print0 | xargs -0 wc -l
 
 相比于 `Swagger`，`apiDoc` 对注释的写法要求
 
-
-
 ### 22) 硬件选型
+
+重IO/内存
+
+### 23) 控制反转/依赖注入
+
+控制反转是一种思想，由依赖注入来实现，依赖注入的实现可以通常采用类构造器的方式。
+主要目的是为了松耦合，其次还可以避免随处可见的new操作，让代码更加优雅.
+
+同时需要注意，控制反转与依赖倒置是两回事。
 
 ## 参考
 
