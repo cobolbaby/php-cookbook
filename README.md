@@ -21,8 +21,13 @@
 
 PHP5.6升级PHP7的负担有哪些？
 
-[日请求亿级的QQ会员AMS平台PHP7升级实践](
+- [日请求亿级的QQ会员AMS平台PHP7升级实践](
 https://www.webfalse.com/read/201768/11898426.html)
+
+除了版本号之外, 还应该关注一下是否是**线程安全**
+
+- [What does thread safety mean when downloading PHP?](http://php.net/manual/en/faq.obtaining.php#faq.obtaining.threadsafety)
+- [What is thread safe or non-thread safe in PHP?](https://stackoverflow.com/questions/1623914/what-is-thread-safe-or-non-thread-safe-in-php)
 
 ### 2) 常见函数
 
@@ -252,11 +257,7 @@ php iconv() 编码转换出错 `Detected an illegal character`，问题的关键
 
 [phpredis 和 predis 使用区别](https://learnku.com/articles/7259/phpredis-and-predis)
 
-#### 2.20) 线程安全
-
-[What does thread safety mean when downloading PHP?](http://php.net/manual/en/faq.obtaining.php#faq.obtaining.threadsafety)
-
-[What is thread safe or non-thread safe in PHP?](https://stackoverflow.com/questions/1623914/what-is-thread-safe-or-non-thread-safe-in-php)
+#### 2.20) 
 
 ### 3) SPL
 
@@ -293,6 +294,8 @@ PHP读取和解析大文件
 内含各种奇淫巧技 :)
 
 ### 1) MySQL
+
+建议看一下: [燕十八MySQL优化视频教程](http://www.php.cn/course/200.html)
 
 #### 1.1) 批量插入
 
@@ -386,7 +389,25 @@ ALTER TABLE 表名 ENABLE KEYS;
 
 字符集的选择直接影响着SQL查询时大小写是否敏感的问题。
 
-而关于编码需要留意一个配置`skip-character-set-client-handshake`，启用选项后，可以避免客户端程序误操作（使用其他字符集连接进来并写入数据，从而引发乱码的问题）
+当我们输入不管大小写都能查询到数据，例如：输入aaa或者aaA ,AAA都能查询同样的结果，说明查询条件对大小写不敏感。
+
+于是怀疑Mysql的问题。做个实验：直接使用客户端用sql查询数据库。发现的确是大小不敏感 。
+
+通过查询资料发现需要设置collate（校对）。 collate规则：
+
+- `*_bin`: 表示的是binary sensitive collation，也就是说是区分大小写的
+- `*_cs`: sensitive collation，区分大小写
+- `*_ci`: insensitive collation，不区分大小写
+
+解决方法：
+
+1. 可以将查询条件用binary()括起来。 比如：  
+`select * from TableA where binary columnA ='aaa';`
+2. 可以修改该字段的collation为binary
+比如：
+`ALTER TABLE TABLENAME MODIFY COLUMN COLUMNNAME VARCHAR(50) BINARY CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL;`
+
+除了上面提到的关于编码还需要留意一个配置`skip-character-set-client-handshake`，启用选项后，可以避免客户端程序误操作（使用其他字符集连接进来并写入数据，从而引发乱码的问题）
 
 #### 1.10) 字段类型
 
@@ -575,6 +596,24 @@ select count(distinct left(word,6))/count(id) from tb_name where 1;
 
 加上反引号 ` , 不过最好是在建表的时候就注意到这一点。
 
+#### 1.32) 查找my.cnf配置文件
+
+如果当您遇到修改MySQL配置之后没有生效，且伴有灵异情况的时候, 查看一下my.cnf配置文件加载的对不对吧. 下面的指令会告诉你你可能会碰到的坑:
+
+```
+/opt/lampp/bin/mysql --help | grep my.cnf
+```
+
+类似的问题可以想一下php.ini文件加载顺序造成的问题, 查看:
+
+```
+/opt/lampp/bin/php -r "phpinfo();" | grep "php.ini"
+```
+
+#### 1.33) 配置优化
+
+- [优化 Azure Linux VM 上的 MySQL 性能](https://docs.azure.cn/zh-cn/virtual-machines/linux/classic/optimize-mysql)
+
 ### 2) 异步处理
 
 是不是你已厌烦了PHP的同步阻塞IO，那就来看一下利用PHP如何实现原生的非阻塞吧，保证让你有一种恍然大悟的赶脚。
@@ -659,7 +698,7 @@ redis-cli KEYS "doctor_*" | xargs redis-cli DEL
 
 #### 3.13) 分布式锁
 
-[Redis分布式锁的正确实现方式](https://www.cnblogs.com/linjiqin/p/8003838.html)
+- [Redis分布式锁的正确实现方式](https://www.cnblogs.com/linjiqin/p/8003838.html)
 
 ### 4) 微服务化
 
@@ -669,7 +708,13 @@ redis-cli KEYS "doctor_*" | xargs redis-cli DEL
 
 #### 4.3) Service Mesh
 
-#### 4.4) 注册中心
+#### 4.4) Zookeeper分布式过程协同
+
+微服务实现难免需要了解Zookeeper/Etcd，但具体到实现阶段，是否要用PHP实现服务注册和服务发现那就另当别论了，一般会考虑常驻进程的语言，而非PHP。可以参考一下 Service Mesh 的实现。
+
+同时在处理分布式事务的时候也需要依赖Zookeeper的强一致性。
+
+#### 4.5) 分布式事务
 
 ### 5) 按需加载
 
@@ -694,7 +739,7 @@ redis-cli KEYS "doctor_*" | xargs redis-cli DEL
 
 #### 6.3) 常见漏洞
 
-模拟漏洞以明确哪些潜在的坑
+参考: [文件上传漏洞（绕过姿势）](https://thief.one/2016/09/22/%E4%B8%8A%E4%BC%A0%E6%9C%A8%E9%A9%AC%E5%A7%BF%E5%8A%BF%E6%B1%87%E6%80%BB-%E6%AC%A2%E8%BF%8E%E8%A1%A5%E5%85%85/)
 
 #### 6.4) Ceph
 
@@ -882,13 +927,7 @@ Solr是新一代的全文检索组件，它比Lucene的搜索效率高很多，�
 - 网站的实时性比较高，也就是说查询频繁（股票，基金）
 - 查询一次后，以后很少查询（国家学历认证网，电信话费查询系统）
 
-### 13) 分布式
-
-#### 13.1) Zookeeper分布式过程协同
-
-微服务实现难免需要了解Zookeeper/Etcd，但具体到实现阶段，是否要用PHP实现服务注册和服务发现那就另当别论了，一般会考虑常驻进程的语言，而非PHP。可以参考一下 Service Mesh 的实现。
-
-同时在处理分布式事务的时候也需要依赖Zookeeper的强一致性。
+### 13) 
 
 ### 14) Session & Cookie
 
@@ -1024,6 +1063,12 @@ find ./ -type f -name "*.php" -print0 | xargs -0 wc -l
 主要目的是为了松耦合，其次还可以避免随处可见的new操作，让代码更加优雅.
 
 同时需要注意，控制反转与依赖倒置是两回事。
+
+### 24) 浏览器指纹
+
+- [Technical analysis of client identification mechanisms](http://www.chromium.org/Home/chromium-security/client-identification-mechanisms)
+- [跨浏览器指纹追踪技术：毫无障碍的查看你的浏览记录](https://www.4hou.com/info/news/3380.html)
+- [Fingerprint.js](https://fingerprintjs.com/)
 
 ## 参考
 
