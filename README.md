@@ -17,7 +17,9 @@
 
 需要了解5.x版本每次升级主要新增了哪些特性，有利于我们写出更优雅的代码。
 
-### 1) 版本差异
+### 1) 运行环境
+
+#### 1.1) 版本差异
 
 PHP5.6升级PHP7的负担有哪些？
 
@@ -28,6 +30,12 @@ https://www.webfalse.com/read/201768/11898426.html)
 
 - [What does thread safety mean when downloading PHP?](http://php.net/manual/en/faq.obtaining.php#faq.obtaining.threadsafety)
 - [What is thread safe or non-thread safe in PHP?](https://stackoverflow.com/questions/1623914/what-is-thread-safe-or-non-thread-safe-in-php)
+
+#### 1.2) 执行环境
+
+- Apache + mod_php
+- Nginx + PHP-FPM
+- OpenResty + PHP-FPM
 
 ### 2) 常见函数
 
@@ -177,7 +185,7 @@ s878926199a
 $mysqli->options(MYSQLI_OPT_INT_AND_FLOAT_NATIVE, 1); 
 ```
 
-#### 2.7) Floating point precision
+#### 2.7) floating point precision
 
 [Float 浮点型](http://php.net/manual/zh/language.types.float.php)
 
@@ -257,7 +265,23 @@ php iconv() 编码转换出错 `Detected an illegal character`，问题的关键
 
 [phpredis 和 predis 使用区别](https://learnku.com/articles/7259/phpredis-and-predis)
 
-#### 2.20) 
+#### 2.20) in_array
+
+关注一下字段类型转化可能引起的异常, 比如:
+
+```php
+$needle = '1abc';
+$haystack = array(1,2,3);
+var_dump(in_array($needle, $haystack); //输出为 true 
+```
+
+#### 2.21) clone
+
+涉及到深浅拷贝的问题, 参考: [对象的复制(拷贝)与__clone()方法](https://www.cnblogs.com/tyrus/p/php_object_clone.html)
+
+#### 2.22) Try Catch
+
+[PHP异常处理](https://www.php.net/manual/zh/language.exceptions.php#119726)
 
 ### 3) SPL
 
@@ -289,6 +313,17 @@ If there must be multiple autoload functions, spl_autoload_register() allows for
 
 PHP读取和解析大文件
 
+### 4) Debug
+
+#### 4.1) Xdebug
+
+#### 4.2) strace跟踪系统调用
+
+```bash
+strace -t -e trace=open -o output.log php index.php
+# -t 显示调用时间
+# -e trace=file 过滤显示
+```
 ## 周边技术
 
 内含各种奇淫巧技 :)
@@ -630,75 +665,9 @@ AMQP（Advanced Message Queuing Protocol），一个标准的高级消息队列�
     
 心跳的话，基于何种协议实现？
 
-#### 2.3) ...
+#### 2.3) Swoole
 
-### 3) Redis
-
-#### 3.1) 管道
-
-如果对 `Redis` 进行批量操作的话，[管道](https://blog.51cto.com/phpme/2136827) 是一个很好的选择。与 `单一操作Key` 相比，其性能有了大幅的提升，主要是因为 `TCP` 连接中减少"交互往返"的时间。此时你是否会想到另外两个批量操作的命令 `mset` 以及 `mget` ，它们和 `pipeline`有没有关系？又分别用在什么场景下。比如缓存群组用户的基本信息。
-
-#### 3.2) Session存储
-
-横向扩展的前提是多实例间共享会话信息，而用Reids就可以统一维护会话信息。
-
-PHP如何将会话信息保存到Redis呢？有必要了解一下session_set_save_handler，同时一定要注意并发情况下Session读写问题。
-
-#### 3.3) Cache-Aside
-
-当存在缓存的时候，如何确保读取到的数据是正确的？
-
-#### 3.4) 计数器
-
-请求限速，删减库存
-
-#### 3.5) List
-
-如果用作消息队列，有哪些不足？比如服务稳定性，比如功能完备性。
-
-当然如果一定要用，一定要留意一下，当List key执行lpop到最后的时候，该key也会被清除，实验如下:
-
-```bash
-redis.shujushijue.cn:6378[6]> LPUSH runoobkey redis
-(integer) 1
-redis.shujushijue.cn:6378[6]> KEYS *
-1) "runoobkey"
-2) "AUTOUPDATE_LOG_LIST"
-redis.shujushijue.cn:6378[6]> lpop runoobkey
-"redis"
-redis.shujushijue.cn:6378[6]> KEYS *
-1) "AUTOUPDATE_LOG_LIST"
-```
-
-#### 3.7) 防雪崩
-
-过期时间应该加一个随机值
-
-#### 3.8) ZSet
-
-有序集合zset除了可以实现排名之外，还可用在哪种业务场景下？延迟处理队列。
-
-#### 3.9) Redis Cluster主从切换问题
-
-部分耗时较久的操作可能引起主从异常切换。如何避免异常切换呢？业务处理的过程中哪些操作应该被严格要求禁止？
-
-#### 3.10) Rename部分管理指令后有何影响
-
-比如key *，还有config get xxx
-
-#### 3.11) Redis Cluster读写负载均衡问题
-
-[phpredis 高并发下需要关注的问题](https://barbery.me/post/2017-03-19-PHP-Summary-of-high-concurrency-issues/)
-
-#### 3.12) 批量删除Key
-
-```
-redis-cli KEYS "doctor_*" | xargs redis-cli DEL
-```
-
-#### 3.13) 分布式锁
-
-- [Redis分布式锁的正确实现方式](https://www.cnblogs.com/linjiqin/p/8003838.html)
+### 3) 
 
 ### 4) 微服务化
 
@@ -712,15 +681,56 @@ redis-cli KEYS "doctor_*" | xargs redis-cli DEL
 
 微服务实现难免需要了解Zookeeper/Etcd，但具体到实现阶段，是否要用PHP实现服务注册和服务发现那就另当别论了，一般会考虑常驻进程的语言，而非PHP。可以参考一下 Service Mesh 的实现。
 
-同时在处理分布式事务的时候也需要依赖Zookeeper的强一致性。
+同时在处理分布式事务的时候也需要依赖Zookeeper的强一致性。可参考:
 
-#### 4.5) 分布式事务
+- [大白话聊聊分布式事务](https://www.bo56.com/%E5%A4%A7%E7%99%BD%E8%AF%9D%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/)
+- [传统事务与柔性事务](https://www.kancloud.cn/xiak/php-node/677625)
 
-### 5) 按需加载
+### 5) Composer
 
-#### 5.1) Composer
+[Composer](https://getcomposer.org/)除了解决了包管理的问题，也让惰性加载更快更好的落地。不过要了解Composer是如何引入自己编写的库时，需要知道 `Psr-4` 规范。
 
-`Composer`已成为PHP库引入的规范，如果你写的库文件仍然不支持被自由引用，那就有点out了。不过要了解Composer时如何引入自己编写的库时需要知道 `Psr-4` 规范
+#### 5.1) 基础指令
+
+- Install Depandence
+
+```
+$ composer install
+Cannot create cache directory ~/.composer/cache/repo/https---packagist.org/, or directory is not writable. Proceeding without cache
+Cannot create cache directory ~/.composer/cache/files/, or directory is not writable. Proceeding without cache
+```
+
+提示这个目录没有可写权限，composer无法缓存下载的包，这样就每次都得重新下载，把目录改成可写可读即可。
+
+```
+sudo chmod -R 777 ~/.composer
+```
+
+- Remove Depandence
+
+```
+$ composer remove tixastronauta/acc-ip
+Loading composer repositories with package information
+Updating dependencies (including require-dev)
+Package operations: 0 installs, 0 updates, 1 removal
+  - Removing tixastronauta/acc-ip (1.0.0)
+Writing lock file
+Generating autoload files
+```
+
+#### 5.2) 黑科技
+
+- 优化自动加载
+
+```
+composer dump-autoload --optimize
+```
+
+- 切换国内源
+
+```
+composer config -g repo.packagist composer https://packagist.phpcomposer.com
+```
 
 ### 6) 文件上传
 
@@ -741,13 +751,7 @@ redis-cli KEYS "doctor_*" | xargs redis-cli DEL
 
 参考: [文件上传漏洞（绕过姿势）](https://thief.one/2016/09/22/%E4%B8%8A%E4%BC%A0%E6%9C%A8%E9%A9%AC%E5%A7%BF%E5%8A%BF%E6%B1%87%E6%80%BB-%E6%AC%A2%E8%BF%8E%E8%A1%A5%E5%85%85/)
 
-#### 6.4) Ceph
-
-#### 6.5) Aliyun OSS
-
-#### 6.6) checksum
-
-#### 6.7) 超大文件解析
+#### 6.4) checksum
 
 ### 7) 并发编程
 
@@ -812,6 +816,8 @@ php使用引用是否有那么大的好处？毕竟php底层采用写时复制�
 说到排序真是一把辛酸泪啊，牛逼的公司必问，而且逢考必挂。
 
 常见的排序算法有几种？快排如何实现？堆排序解决了什么问题？能否再举几个应用的示例？
+
+- [常见排序算法性能比较](https://www.lbog.cn/blog/39)
 
 ### 10) 安防
 
@@ -899,11 +905,34 @@ Solr是新一代的全文检索组件，它比Lucene的搜索效率高很多，�
 
 #### 11.2) 纯真IP地址库
 
-文本数据库的数据结构还是值得借鉴一下
+纯真IP官网：http://www.cz88.net/
+
+首先需要**将纯真IP库转存为CSV，方便入库**
+
+Windows环境下安装最新的版本，并解压为ip.txt文件。使用vi打开ip.txt文件，执行3次以下命令
+
+```
+:%s/\s\+/;/
+```
+
+详解：ip.txt有4列。分别是起始ip，结束ip，地区，说明。列之间用不等数量的空格间隔。为了将此文本文件到入到mysql，需要处理掉这些空格。但是只能处理掉前3列的空格，最后一列中的空格要保留。vi中输入的命令意思是，把每一行第一个连续的空格替换成字符';'。%s代表全局搜索替换。\s代表空格。\+代表尽可能多地匹配前面的字符。;代表替换成';' 
+
+使用Excel打开处理后的文件，并指定';'为分隔符
 
 #### 11.3) 二叉搜索树(BST)
 #### 11.4) 平衡二叉树(AVL)
 #### 11.5) B+Tree/B-Tree
+
+多叉树
+
+#### 11.6) 广度优先(BFS)
+
+常用于以下业务场景中:
+
+- 网络爬虫
+- 搜索指定格式的文件
+- 查找两点间最短路径
+- 查看两点间是否存在联系
 
 ### 12) 页面静态化
 
@@ -927,13 +956,15 @@ Solr是新一代的全文检索组件，它比Lucene的搜索效率高很多，�
 - 网站的实时性比较高，也就是说查询频繁（股票，基金）
 - 查询一次后，以后很少查询（国家学历认证网，电信话费查询系统）
 
-### 13) 
+### 13) Session
 
-### 14) Session & Cookie
+待完善
 
+### 14) 硬件选型
 
+重IO/内存
 
-### 15) 城市分站
+### 15) 多站点管理
 
 按照城市划分子站，其中有哪些考虑要素？
 
@@ -949,7 +980,7 @@ Solr是新一代的全文检索组件，它比Lucene的搜索效率高很多，�
 
 ### 17) 插件机制
 
-使用钩子可以更好的做到切面编程，说到底就是面向接口的编程。常见的Wordpress中就有很多钩子，这也造就了一大批优秀的WP插件。
+使用钩子可以更好的做到切面编程，说到底就是面向接口的编程。常见的Wordpress中就内置了很多钩子，可以看一下 [WordPress Actions and Filters](https://code.tutsplus.com/articles/the-beginners-guide-to-wordpress-actions-and-filters--wp-27373)
 
 ### 18) 视图渲染
 
@@ -1043,28 +1074,18 @@ Wordpress中应用
 </html5>
 ```
 
-### 19) 统计代码行数
-
-```bash
-find ./ -type f -name "*.php" -print0 | xargs -0 wc -l
-```
-
-### 20) apiDoc
+### 19) apiDoc
 
 相比于 `Swagger`，`apiDoc` 对注释的写法要求
 
-### 22) 硬件选型
-
-重IO/内存
-
-### 23) 控制反转/依赖注入
+### 20) 控制反转/依赖注入
 
 控制反转是一种思想，由依赖注入来实现，依赖注入的实现可以通常采用类构造器的方式。
-主要目的是为了松耦合，其次还可以避免随处可见的new操作，让代码更加优雅.
+主要目的是为了松耦合，比如要改类名的时候，以及要实现单实例的时候。
 
 同时需要注意，控制反转与依赖倒置是两回事。
 
-### 24) 浏览器指纹
+### 21) 浏览器指纹
 
 - [Technical analysis of client identification mechanisms](http://www.chromium.org/Home/chromium-security/client-identification-mechanisms)
 - [跨浏览器指纹追踪技术：毫无障碍的查看你的浏览记录](https://www.4hou.com/info/news/3380.html)
@@ -1076,9 +1097,7 @@ find ./ -type f -name "*.php" -print0 | xargs -0 wc -l
 - [PHP之道](http://laravel-china.github.io/php-the-right-way/)
 - [PHP非阻塞实现方法](https://www.awaimai.com/660.html)
 - [MySQL批量修改](https://www.awaimai.com/2103.html)
-- [WordPress Actions and Filters](https://code.tutsplus.com/articles/the-beginners-guide-to-wordpress-actions-and-filters--wp-27373)
 - [在PHP中使用协程实现多任务调度](http://www.laruence.com/2015/05/28/3038.html)
-- [常见排序算法性能比较](https://www.lbog.cn/blog/39)
 - [PDO查询超时设置方法](https://www.mudoom.com/blog/2017/07/30/pdo%EF%BC%88mysql%E9%A9%B1%E5%8A%A8%EF%BC%89%E6%9F%A5%E8%AF%A2%E8%B6%85%E6%97%B6%E8%AE%BE%E7%BD%AE%E6%96%B9%E6%B3%95/)
 - [Choosing a MySQL PHP drivers](http://php.net/manual/en/mysqlinfo.api.choosing.php)
 - [我必须得告诉大家的MySQL优化原理](https://www.jianshu.com/p/d7665192aaaf)
