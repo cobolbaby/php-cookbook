@@ -4,7 +4,7 @@
 
 ## 编写目标
 
-搞PHP也5年了，算是有一些大型项目的开发经验，做个分享希望可以帮助到一些有点迷茫的同学，同时接受各方的批评和指点。
+搞PHP也5年了，算是有一些中型项目的开发经验，做个分享希望可以帮助到一些有点迷茫的同学，同时接受各方的批评和指点。
 
 ## 每日一题
 
@@ -37,7 +37,11 @@ https://www.webfalse.com/read/201768/11898426.html)
 - Nginx + PHP-FPM
 - OpenResty + PHP-FPM
 
-### 2) 常见函数
+#### 1.3) 硬件选型
+
+重IO/内存
+
+### 2) 常见函数的坑
 
 #### 2.1) ob_clean
 
@@ -313,11 +317,55 @@ If there must be multiple autoload functions, spl_autoload_register() allows for
 
 PHP读取和解析大文件
 
-### 4) Debug
+### 4) Composer
 
-#### 4.1) Xdebug
+[Composer](https://getcomposer.org/)除了解决了包管理的问题，也让惰性加载更快更好的落地。不过要了解Composer是如何引入自己编写的库时，需要知道 `Psr-4` 规范。
 
-#### 4.2) strace跟踪系统调用
+#### 4.1) 基础指令
+
+- Install Depandence
+
+```
+$ composer install
+Cannot create cache directory ~/.composer/cache/repo/https---packagist.org/, or directory is not writable. Proceeding without cache
+Cannot create cache directory ~/.composer/cache/files/, or directory is not writable. Proceeding without cache
+```
+
+提示这个目录没有可写权限，composer无法缓存下载的包，这样就每次都得重新下载，把目录改成可写可读即可。
+
+```
+sudo chmod -R 777 ~/.composer
+```
+
+- Remove Depandence
+
+```
+$ composer remove tixastronauta/acc-ip
+Loading composer repositories with package information
+Updating dependencies (including require-dev)
+Package operations: 0 installs, 0 updates, 1 removal
+  - Removing tixastronauta/acc-ip (1.0.0)
+Writing lock file
+Generating autoload files
+```
+
+- 优化自动加载
+
+```
+composer dump-autoload --optimize
+```
+
+- 切换国内源
+
+```
+composer config -g repo.packagist composer https://packagist.phpcomposer.com
+```
+
+### 5) Debug
+
+#### 5.1) Xdebug
+
+#### 5.2) strace跟踪系统调用
 
 ```bash
 strace -t -e trace=open -o output.log php index.php
@@ -456,15 +504,13 @@ ip/time/enum/money/汉字
 
 弱类型语言在执行SQL插入的时候枚举值没有引号可能有问题，尤其对于新手；并且对于0/''/NULL等值要特别留意，不然会出现意外。
 
-#### 1.11) 事务
+#### 1.11) 事务隔离级别
 
-明确事务的隔离级别。。。
-
-并发下如何保证事务安全
+明确事务的隔离级别，以及什么原因会导致死锁，如何复现? 如何避免？
 
 #### 1.12) 存储过程
 
-存储过程的价值体现在哪？为什么需要存储过程？在分布式数据库中存储过程在哪执行调用？
+其实我们可以把存储过程看做是业务处理下沉的一个体现。在数据库层级实现了部分的业务服务。
 
 #### 1.13) 视图
 
@@ -474,9 +520,7 @@ ip/time/enum/money/汉字
 
 不过以上情况更通常采用服务化的路子解决。
 
-#### 1.14) 死锁
-
-了解死锁之前，需要知道MySQL中行级锁和表级锁该怎么理解，并且什么原因会导致死锁，如何复现? 如何避免？
+#### 1.14) 
 
 #### 1.15) Online DDL
 
@@ -590,19 +634,7 @@ UPDATE SET FROM 将某表的一列替换为其他表的某一列
 
 子查询/ORDER BY/GROUP BY/DISTINCT/UNION 以上操作可能会创建。。。
 
-#### 1.28) 对象关系模型
-
-ORM(Object Relational Mapping)到底是个啥？怎么理解对象关系映射？
-
-ORM可以拆分为两部分理解，O以及RM，即对象以及关系映射。ORM Lib的作用就是将 对象 与 数据库表结构 进行映射关联，从而实现操控对象就是操控数据库中数据记录。
-
-**优缺点**
-
-- 直接拼写SQL会有以下几个问题：
-    - 每条SQL语句都需要指明表的前缀
-    - SQL语句复杂时，极易出现编写错误的情况
-- ORM的优势：
-    - 操纵对象相当于操控数据记录，较易规避问题
+#### 1.28) 
 
 #### 1.29) 缓解主从复制延迟的方法
 
@@ -667,7 +699,17 @@ AMQP（Advanced Message Queuing Protocol），一个标准的高级消息队列�
 
 #### 2.3) Swoole
 
-### 3) 
+### 3) 认证鉴权
+
+#### 3.1) Session
+#### 3.2) JWT
+#### 3.3) OAuth2
+#### 3.4) 浏览器指纹
+
+- [Technical analysis of client identification mechanisms](http://www.chromium.org/Home/chromium-security/client-identification-mechanisms)
+- [跨浏览器指纹追踪技术：毫无障碍的查看你的浏览记录](https://www.4hou.com/info/news/3380.html)
+- [Fingerprint.js](https://fingerprintjs.com/)
+
 
 ### 4) 微服务化
 
@@ -686,51 +728,9 @@ AMQP（Advanced Message Queuing Protocol），一个标准的高级消息队列�
 - [大白话聊聊分布式事务](https://www.bo56.com/%E5%A4%A7%E7%99%BD%E8%AF%9D%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/)
 - [传统事务与柔性事务](https://www.kancloud.cn/xiak/php-node/677625)
 
-### 5) Composer
+### 5) 代码注释
 
-[Composer](https://getcomposer.org/)除了解决了包管理的问题，也让惰性加载更快更好的落地。不过要了解Composer是如何引入自己编写的库时，需要知道 `Psr-4` 规范。
-
-#### 5.1) 基础指令
-
-- Install Depandence
-
-```
-$ composer install
-Cannot create cache directory ~/.composer/cache/repo/https---packagist.org/, or directory is not writable. Proceeding without cache
-Cannot create cache directory ~/.composer/cache/files/, or directory is not writable. Proceeding without cache
-```
-
-提示这个目录没有可写权限，composer无法缓存下载的包，这样就每次都得重新下载，把目录改成可写可读即可。
-
-```
-sudo chmod -R 777 ~/.composer
-```
-
-- Remove Depandence
-
-```
-$ composer remove tixastronauta/acc-ip
-Loading composer repositories with package information
-Updating dependencies (including require-dev)
-Package operations: 0 installs, 0 updates, 1 removal
-  - Removing tixastronauta/acc-ip (1.0.0)
-Writing lock file
-Generating autoload files
-```
-
-#### 5.2) 黑科技
-
-- 优化自动加载
-
-```
-composer dump-autoload --optimize
-```
-
-- 切换国内源
-
-```
-composer config -g repo.packagist composer https://packagist.phpcomposer.com
-```
+相比于 `Swagger`，`apiDoc` 对注释的写法要求
 
 ### 6) 文件上传
 
@@ -763,29 +763,17 @@ composer config -g repo.packagist composer https://packagist.phpcomposer.com
 
 ...
 
-#### 7.3) 协程
+#### 7.3) 文件锁
 
-如何使用yeild实现？
+#### 7.4) 信号量
 
-#### 7.4) 守护进程
+共享内存
 
-在处理消息队列中的任务时，采用守护进程的方式处理，但守护进程需要考虑的因素有很多，比如内存溢出，程序退出，优雅重启，避免窗口退出造成进程死掉
+#### 7.5) 分布式锁
 
-#### 7.5) 锁
+#### 7.6) sync.Mutex
 
-常见锁有几种类型？各类锁的使用场景？
-
-- 分布式锁
-- 悲观锁
-- 乐观锁
-
-#### 7.6) 共享内存
-
-Linux操作系统的/dev/shm是什么你知道吗？
-
-#### 7.7) 信号量
-
-### 8) 内存使用
+### 8) 内存优化
 
 如何控制内存的使用率？
 
@@ -799,16 +787,15 @@ Linux操作系统的/dev/shm是什么你知道吗？
 
 如果有看过PDO::query的返回值类型的话，我们会发现，这个方法返回的 PDOStatement，正是对 Iterator 的实现。
 
-#### 8.2) 引用
+#### 8.2) 对象引用
 
 php使用引用是否有那么大的好处？毕竟php底层采用写时复制实现。
 
-#### 8.3) 流式处理
+#### 8.3) 分片处理
 
 对buffer高效利用的体现
 
 #### 8.4) 命名管道
-
 
 
 ### 9) 排序算法
@@ -934,57 +921,9 @@ Windows环境下安装最新的版本，并解压为ip.txt文件。使用vi打�
 - 查找两点间最短路径
 - 查看两点间是否存在联系
 
-### 12) 页面静态化
+### 12) 视图渲染
 
-**两种策略**
-
-- 真静态
-- 伪静态
-    - Nginx Rewrite
-    - 路由解析
-
-**真静态的优点**
-
-- 访问速度快(不用调用php解析模块，不需要查询数据库)
-- 利于SEO
-- 防止SQL注入
-
-由此可以看出门户网站最需要静态化
-
-**在以下情况下不建议使用真静态**
-
-- 网站的实时性比较高，也就是说查询频繁（股票，基金）
-- 查询一次后，以后很少查询（国家学历认证网，电信话费查询系统）
-
-### 13) Session
-
-待完善
-
-### 14) 硬件选型
-
-重IO/内存
-
-### 15) 多站点管理
-
-按照城市划分子站，其中有哪些考虑要素？
-
-最好的办法是从你们公司自己的DNS解析去设置，这是效率最高的。还可以在你们所有服务器前端搭一个反向代理，比如Nginx，它有个扩展模块好像叫geo的模块，可以从这里配置，不同地区的ip段代理到不同的分站。最差的方法就是rewrite。三种方式都可以实现。
-
-[城市分站的功能如何实现？](https://segmentfault.com/q/1010000010568305/a-1020000010579431)
-
-[多城市平台性网站的设计思路](https://www.zhihu.com/question/36280479)
-
-### 16) 日志管理
-
-参考一下 [Monolog](https://github.com/Seldaek/monolog)，但此处更重要的是观察者模式如何实现？以及日志能否异步处理或者多观察者并行处理？
-
-### 17) 插件机制
-
-使用钩子可以更好的做到切面编程，说到底就是面向接口的编程。常见的Wordpress中就内置了很多钩子，可以看一下 [WordPress Actions and Filters](https://code.tutsplus.com/articles/the-beginners-guide-to-wordpress-actions-and-filters--wp-27373)
-
-### 18) 视图渲染
-
-#### 18.1) DocumentFragment
+#### 12.1) DocumentFragment
 
 Wordpress中应用
 
@@ -1074,22 +1013,45 @@ Wordpress中应用
 </html5>
 ```
 
-### 19) apiDoc
+#### 12.2) 页面静态化
 
-相比于 `Swagger`，`apiDoc` 对注释的写法要求
+**两种策略**
 
-### 20) 控制反转/依赖注入
+- 真静态
+- 伪静态
+    - Nginx Rewrite
+    - 路由解析
 
-控制反转是一种思想，由依赖注入来实现，依赖注入的实现可以通常采用类构造器的方式。
-主要目的是为了松耦合，比如要改类名的时候，以及要实现单实例的时候。
+**真静态的优点**
 
-同时需要注意，控制反转与依赖倒置是两回事。
+- 访问速度快(不用调用php解析模块，不需要查询数据库)
+- 利于SEO
+- 防止SQL注入
 
-### 21) 浏览器指纹
+由此可以看出门户网站最需要静态化
 
-- [Technical analysis of client identification mechanisms](http://www.chromium.org/Home/chromium-security/client-identification-mechanisms)
-- [跨浏览器指纹追踪技术：毫无障碍的查看你的浏览记录](https://www.4hou.com/info/news/3380.html)
-- [Fingerprint.js](https://fingerprintjs.com/)
+**在以下情况下不建议使用真静态**
+
+- 网站的实时性比较高，也就是说查询频繁（股票，基金）
+- 查询一次后，以后很少查询（国家学历认证网，电信话费查询系统）
+
+### 13) 多站点管理
+
+按照城市划分子站，其中有哪些考虑要素？
+
+最好的办法是从你们公司自己的DNS解析去设置，这是效率最高的。还可以在你们所有服务器前端搭一个反向代理，比如Nginx，它有个扩展模块好像叫geo的模块，可以从这里配置，不同地区的ip段代理到不同的分站。最差的方法就是rewrite。三种方式都可以实现。
+
+[城市分站的功能如何实现？](https://segmentfault.com/q/1010000010568305/a-1020000010579431)
+
+[多城市平台性网站的设计思路](https://www.zhihu.com/question/36280479)
+
+### 14) 日志管理
+
+参考一下 [Monolog](https://github.com/Seldaek/monolog)，但此处更重要的是观察者模式如何实现？以及日志能否异步处理或者多观察者并行处理？
+
+### 15) 插件机制
+
+使用钩子可以更好的做到切面编程，说到底就是面向接口的编程。常见的Wordpress中就内置了很多钩子，可以看一下 [WordPress Actions and Filters](https://code.tutsplus.com/articles/the-beginners-guide-to-wordpress-actions-and-filters--wp-27373)
 
 ## 参考
 
