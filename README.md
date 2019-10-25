@@ -19,7 +19,13 @@
 
 ### 1) 运行环境
 
-#### 1.1) 版本差异
+#### 1.1) 执行环境
+
+- Apache + mod_php
+- Nginx + PHP-FPM
+- OpenResty + PHP-FPM
+
+#### 1.2) 版本差异
 
 PHP5.6升级PHP7的负担有哪些？
 
@@ -30,12 +36,6 @@ https://www.webfalse.com/read/201768/11898426.html)
 
 - [What does thread safety mean when downloading PHP?](http://php.net/manual/en/faq.obtaining.php#faq.obtaining.threadsafety)
 - [What is thread safe or non-thread safe in PHP?](https://stackoverflow.com/questions/1623914/what-is-thread-safe-or-non-thread-safe-in-php)
-
-#### 1.2) 执行环境
-
-- Apache + mod_php
-- Nginx + PHP-FPM
-- OpenResty + PHP-FPM
 
 #### 1.3) 硬件选型
 
@@ -317,7 +317,7 @@ If there must be multiple autoload functions, spl_autoload_register() allows for
 
 PHP读取和解析大文件
 
-### 4) Composer
+### 4) 包管理
 
 [Composer](https://getcomposer.org/)除了解决了包管理的问题，也让惰性加载更快更好的落地。不过要了解Composer是如何引入自己编写的库时，需要知道 `Psr-4` 规范。
 
@@ -372,314 +372,97 @@ strace -t -e trace=open -o output.log php index.php
 # -t 显示调用时间
 # -e trace=file 过滤显示
 ```
+
+### 6) php.ini配置
+
+#### 6.1) 上传文件上限
+
+如果需要上传较大文件,可能出现以下错误
+```
+PHP Fatal error:  Allowed memory size of 134217728 bytes exhausted (tried to allocate 72 bytes) in /opt/shujuguan/www/oc/Application/Api/Connectors/Huoban.class.php on line 220
+```
+需要修改php底层配置文件中的三个参数, 建议配置大小
+```
+memory_limit=512M
+post_max_size=256M
+upload_max_filesize=256M
+```
+
+#### 6.2) 一个脚本中变量上限
+
+第三方(伙伴云)数据更新的时候, php会抛以下错误
+```
+PHP Warning:  Unknown: Input variables exceeded 35000. To increase the limit change max_input_vars in php.ini. in Unknown on line 0
+```
+建议配置
+```
+; How many GET/POST/COOKIE input variables may be accepted
+; Unknown: Input variables exceeded 1000.
+max_input_vars = 40000
+```
+
+#### 6.3) 开启browscap，以便获取设备信息
+
+到 http://browscap.org/ 下载最新版本的库文件
+```
+[browscap]
+; http://php.net/browscap
+; 配置路径为文件绝对地址
+browscap = "/opt/lampp/etc/extra/lite_php_browscap.ini"
+```
+
+#### 6.4) 安装Redis扩展
+
+支持session数据存储到redis中
+
+#### 6.5) 生产环境下屏蔽异常输出
+
+```
+display_errors = Off
+```
+
+#### 6.6) 安装CA证书,支持Curl SSL访问
+
+原来的guzzle5版本已经不再被支持, 需要升级到guzzle6, 但执行中会出现curl证书检查异常, 需要在php.ini中做如下配置:
+ 
+下载[curl官方CA证书](http://https://curl.haxx.se/ca/cacert.pem) 
+放到/opt/lampp/php/cacert.pem或者某个位置,编辑 php.ini 添加如下配置
+> [curl]
+> curl.cainfo = "/opt/lampp/php/cacert.pem"
+
+restart apache即可生效
+
+#### 6.7) enable Zend opcache
+
+xampp已经集成了zend opcache, 服务器环境下建议直接开启,据说会让PHP执行效率提升6~7倍
+```
+zend_extension=opcache.so
+```
+
+#### 6.8) 请求返回隐藏php版本号
+
+```
+; Decides whether PHP may expose the fact that it is installed on the server
+; (e.g. by adding its signature to the Web server header).  It is no security
+; threat in any way, but it makes it possible to determine whether you use PHP
+; on your server or not.
+; http://php.net/expose-php
+expose_php=Off
+```
+
+#### 6.9) 修改session domain, 支持企业子域名
+
+```
+session.cookie_domain=.domain.com
+```
+
 ## 周边技术
 
 内含各种奇淫巧技 :)
 
-### 1) MySQL
+### 1) 数据库
 
-建议看一下: [燕十八MySQL优化视频教程](http://www.php.cn/course/200.html)
-
-#### 1.1) 批量插入
-
-对于一些数据量较大的系统，数据库面临的问题除了查询效率低下，还有就是数据入库时间长。特别像报表系统，每天花费在数据导入上的时间可能会长达几个小时或十几个小时之久。因此，优化数据库插入性能是很有意义的。
-
-数据插入优化时很容易想到合并insert语句进而达到批量添加的目的。之前做过一个性能测试，验证一下插入1000条数据的时间，最后发现一次性插入的话算上网络延迟撑死也就3s，而如果逐条插入，即便采用连接池，时间也得在300s开外，如果每插入一次还要建一次连接的话，那时间可想而知肯定会更长，所以能批量插入的时候绝对要首选。
-
-有的时候还需要注意一点就是autocommit，如果起始设置为false，则后续做的插入或者修改操作都会在最后一次性提交，所以批量插入的时候可以采用 合并数据+合并事务+有序插入 的方式。
-
-插入记录时，MySQL会根据表的索引对插入的记录进行排序。如果插入大量数据时，这些排序会降低插入的速度。为了解决这种情况，在插入记录之前先禁用索引。等插入之后再启用索引。对于新创建的表，可以先不创建索引，等记录都导入以后再创建索引。这样可以提高导入数据的速度。
-
-```
-ALTER TABLE 表名 DISABLE KEYS;
-ALTER TABLE 表名 ENABLE KEYS;
-```
-
-**[⬆ back to top](#table-of-contents)**
-
-#### 1.2) 容量估算
-
-计算数据库中各个表的数据量和每行记录所占用空间
-
-[计算数据库中各个表的数据量和每行记录所占用空间](http://www.cnblogs.com/yzwdli/p/5337881.html)
-
-[谈数据库容量和性能测算](http://itindex.net/detail/39281-%E6%95%B0%E6%8D%AE%E5%BA%93-%E5%AE%B9%E9%87%8F-%E6%80%A7%E8%83%BD)
-
-#### 1.3) 连接池
-
-原生PHP没办法实现，考虑一下周边的解决方案，比如采用数据库中间件去实现连接池的功能。
-
-#### 1.4) 长连接
-
-仅在PHP-FPM管控下可实现长连接，Apache的话就别想了。不过一定要想好什么时候释放连接资源，别到时候出现`too many clients`的问题。
-
-#### 1.5) 读写分离
-
-利用框架级别实现还是用中间件实现？各有什么优缺点？
-
-除了业务读写分离，最重要的反倒是如何保障主从之间的同步
-
-- 半同步复制
-- GTID
-
-#### 1.6) Proxy
-
-作用:
-
-- 分库分表
-- 读写分离
-- 连接池
-
-#### 1.7) 分库分表分区
-
-大表分割会使得用户在对数据库进行增删改查时候，服务器CPU的负载下降，性能会提升。这种技术可分为两种：垂直分表与水平分表。
-
-- 垂直拆分
-
-垂直拆分是一种把数据库中的表按列变成几张表的方法，这样可以降低表的复杂度和字段的数目，从而达到优化的目的。 
-
-示例一：在Users表中有一个字段是家庭地址，这个字段是可选字段，而且你在数据库操作的时候除了个人信息外，你并不需要经常读取或是改写这个字段。那么，为什么不把他放到另外一张表中呢？ 这样会让你的表更小，性能也更好，对于用户表来说，只有用户ID，用户名，口令，用户角色等会被经常使用。
-
-示例二： 你有一个叫 “last_login” 的字段，它会在每次用户登录时被更新。但是，每次更新都会导致该表的查询缓存被清空。所以，你可以把这个字段放到另一个表中，这样就不会影响你对用户ID，用户名，用户角色的不停地读取了，因为查询缓存会帮你提高性能。 
-
-另外，你需要注意的是，这些被分出去的字段所形成的表，你不会经常性地去Join他们，不然的话，这样的性能会比不分割时还要差，而且，会是极数级的下降。 
-
-- 水平拆分
-
-如何做分布才能让每个数据库节点的负载均衡？
-
-- 分区
-
-[如何理解MySQL的表分区？](http://blog.sijiaomao.com/?p=1592)
-
-#### 1.8) 严格模式
-
-有些集成的PHP运行环境(WAMP/XAMPP)自带的MySQL貌似都没有开启MySQL的严格模式。那何为MySQL的严格模式，简单来说就是MySQL自身对数据进行严格的校验（格式、长度、类型等），比如一个整型字段我们写入一个字符串类型的数据，在非严格模式下MySQL不会报错，同样如果定义了char或varchar类型的字段，当写入或更新的数据超过了定义的长度也不会报错。MySQL开启了严格模式从一定程序上来讲是对我们代码的一种测试，如果我们的开发环境没有开启严格模式在，开发过程中也没有遇到错误，那么在上线或代码移植的时候将有可能出现不兼容的情况，因此在开发过程做最好开启MySQL的严格模式。
-
-**如何开启**
-
-1. 可以通过执行SQL语句来开启
-
-    但是只对当前连接有效，下面是SQL语句：
-`set sql_mode="STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION";`
-
-2. 通过修改MySQL的配置文件
-
-    在`[mysqld]`下查找`sql-mode`，将此行修改成为: 
-`sql-mode="STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION"`，推荐第二种方法，可以一劳永逸。
-
-#### 1.9) 编码字符集
-
-字符集的选择直接影响着SQL查询时大小写是否敏感的问题。
-
-当我们输入不管大小写都能查询到数据，例如：输入aaa或者aaA ,AAA都能查询同样的结果，说明查询条件对大小写不敏感。
-
-于是怀疑Mysql的问题。做个实验：直接使用客户端用sql查询数据库。发现的确是大小不敏感 。
-
-通过查询资料发现需要设置collate（校对）。 collate规则：
-
-- `*_bin`: 表示的是binary sensitive collation，也就是说是区分大小写的
-- `*_cs`: sensitive collation，区分大小写
-- `*_ci`: insensitive collation，不区分大小写
-
-解决方法：
-
-1. 可以将查询条件用binary()括起来。 比如：  
-`select * from TableA where binary columnA ='aaa';`
-2. 可以修改该字段的collation为binary
-比如：
-`ALTER TABLE TABLENAME MODIFY COLUMN COLUMNNAME VARCHAR(50) BINARY CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL;`
-
-除了上面提到的关于编码还需要留意一个配置`skip-character-set-client-handshake`，启用选项后，可以避免客户端程序误操作（使用其他字符集连接进来并写入数据，从而引发乱码的问题）
-
-#### 1.10) 字段类型
-
-ip/time/enum/money/汉字
-
-如何存储`IP`，`Money`以及`DATETIME`类型数据
-
-[VARCHAR(50)最多能存多少个汉字](https://zhidao.baidu.com/question/1368150009483131619.html)
-
-[枚举类型ENUM](https://dev.mysql.com/doc/refman/5.6/en/enum.html) 是非常快和紧凑的。实际上，其保存为TINYINT，只是其表面上显示为字符串。看起来用这个字段来做一些选项列表变得相当的完美。 但有哪些潜在的坑呢
-
-弱类型语言在执行SQL插入的时候枚举值没有引号可能有问题，尤其对于新手；并且对于0/''/NULL等值要特别留意，不然会出现意外。
-
-#### 1.11) 事务隔离级别
-
-明确事务的隔离级别，以及什么原因会导致死锁，如何复现? 如何避免？
-
-#### 1.12) 存储过程
-
-其实我们可以把存储过程看做是业务处理下沉的一个体现。在数据库层级实现了部分的业务服务。
-
-#### 1.13) 视图
-
-视图的价值
-- 面向不同角色用户，访问不同的视图，方便做权限管理，对数据安全性要求很高的公司必须要考虑的 
-- 简化上层业务逻辑，底层表结构对上层近乎透明，DBA做表结构调整时对上层业务代码没有影响，尤其是当一套数据被多个业务子系统共享时，此问题尤为明显。
-
-不过以上情况更通常采用服务化的路子解决。
-
-#### 1.14) 
-
-#### 1.15) Online DDL
-
-#### 1.16) 小表驱动大表
-
-适用于以下查询关键词: `in`, `exists`, `join`
-
-- in/exists
-    - 小表驱动大表
-
-- join优化
-    - 小表驱动大表
-    - 被驱动集合建索引
-    - innodb_buffer_pool_size
-
-- not in
-
-    not in 不会用到索引，那咋办？可以考虑用 `union`/`not exists`/`left join` 替代
-
-#### 1.17) 分组聚合
-
-分组聚合的本质就是先排序后聚合，所以一定要利用好索引的左前缀原则，避免生成不必要的临时表。
-
-#### 1.18) 范围查询
-
-`between`，` <`，`>` 的优化主要是利用B+Tree的特性。
-
-#### 1.19) 分页查询
-
-采用延迟索引
-
-#### 1.20) 左前缀原则
-
-如(f1,f2,f3,fN)的复合索引
-
-where条件按照索引建立的顺序来写，就可以使用到索引，而且因为查询优化器的存在，即便不按照顺序写，最后也能用到索引。
-
-如果条件中不含中间某列，或者某列的查询条件是like，则会导致后面的列无法应用索引。
-
-```
-mysql> explain select * from ocenter_verify where uid = 0 and oid = 0 and type = 'mobile';
-+----+-------------+----------------+------+---------------+-------------+---------+-------------------+------+-----------------------+
-| id | select_type | table          | type | possible_keys | key         | key_len | ref               | rows | Extra                 |
-+----+-------------+----------------+------+---------------+-------------+---------+-------------------+------+-----------------------+
-|  1 | SIMPLE      | ocenter_verify | ref  | idx_example   | idx_example | 90      | const,const,const |   17 | Using index condition |
-+----+-------------+----------------+------+---------------+-------------+---------+-------------------+------+-----------------------+
-1 row in set (0.01 sec)
-
-mysql> explain select * from ocenter_verify where uid = 0 and type = 'mobile' and verify = '1111';
-+----+-------------+----------------+------+---------------+-------------+---------+-------+------+-----------------------+
-| id | select_type | table          | type | possible_keys | key         | key_len | ref   | rows | Extra                 |
-+----+-------------+----------------+------+---------------+-------------+---------+-------+------+-----------------------+
-|  1 | SIMPLE      | ocenter_verify | ref  | idx_example   | idx_example | 4       | const |   34 | Using index condition |
-+----+-------------+----------------+------+---------------+-------------+---------+-------+------+-----------------------+
-1 row in set (0.00 sec)
-
-mysql> explain select * from ocenter_verify where uid = 0 and type like 'mobile%' and verify = '1111';
-+----+-------------+----------------+------+---------------+-------------+---------+-------+------+-----------------------+
-| id | select_type | table          | type | possible_keys | key         | key_len | ref   | rows | Extra                 |
-+----+-------------+----------------+------+---------------+-------------+---------+-------+------+-----------------------+
-|  1 | SIMPLE      | ocenter_verify | ref  | idx_example   | idx_example | 4       | const |   34 | Using index condition |
-+----+-------------+----------------+------+---------------+-------------+---------+-------+------+-----------------------+
-1 row in set (0.01 sec)
-
-mysql> explain select * from ocenter_verify where oid = 0 and type = 'mobile';
-+----+-------------+----------------+------+---------------+------+---------+------+------+-------------+
-| id | select_type | table          | type | possible_keys | key  | key_len | ref  | rows | Extra       |
-+----+-------------+----------------+------+---------------+------+---------+------+------+-------------+
-|  1 | SIMPLE      | ocenter_verify | ALL  | NULL          | NULL | NULL    | NULL |  191 | Using where |
-+----+-------------+----------------+------+---------------+------+---------+------+------+-------------+
-1 row in set (0.00 sec)
-
-mysql> explain select * from ocenter_verify where type = 'mobile' and verify = '1111';
-+----+-------------+----------------+------+---------------+------+---------+------+------+-------------+
-| id | select_type | table          | type | possible_keys | key  | key_len | ref  | rows | Extra       |
-+----+-------------+----------------+------+---------------+------+---------+------+------+-------------+
-|  1 | SIMPLE      | ocenter_verify | ALL  | NULL          | NULL | NULL    | NULL |  191 | Using where |
-+----+-------------+----------------+------+---------------+------+---------+------+------+-------------+
-1 row in set (0.00 sec)
-```
-
-#### 1.21) 覆盖索引
-
-如果查询的列恰好是索引的一部分，那么查询的时候就不需要回行到磁盘再找数据，这样的查询速度非常快。
-
-#### 1.22) 精度损失
-
-浮点类型常见问题，所有的语言貌似都存在此类问题。
-
-#### 1.23) 自增主键
-
-分布式或分部分表之后，自增主键有没有必要？如果有必要又该如何维护该信息？
-
-#### 1.24) 预编译
-
-[MySQL · 特性分析 · MySQL的预编译功能](http://mysql.taobao.org/monthly/2018/04/07/)
-
-#### 1.25) 重建索引
-
-[Rebuilding or Repairing Tables or Indexes](https://dev.mysql.com/doc/refman/5.6/en/rebuilding-tables.html)
-
-#### 1.26) 关联表更新
-
-UPDATE SET FROM 将某表的一列替换为其他表的某一列
-
-#### 1.27) 临时表
-
-[MySQL · 特性分析 · 内部临时表](http://mysql.taobao.org/monthly/2016/06/07/)
-
-外部临时表存储在内存还是磁盘？哪些操作会产生内部临时表？而如何内存临时表的数据存储在磁盘的话，磁盘IO可想而知。
-
-子查询/ORDER BY/GROUP BY/DISTINCT/UNION 以上操作可能会创建。。。
-
-#### 1.28) 
-
-#### 1.29) 缓解主从复制延迟的方法
-
-1. 高速网络
-2. 从库SSD
-3. 降低从库负载，使用多个从库
-4. 严格要求一致性的，不要查从库
-
-#### 1.30) 索引长度与区分度
-
-column列也可以增设索引长度，column(index_length)列索引长度
-
-```sql
-ALTER TABLE index7 ADD INDEX index7_name(name(20));
-```
-
-区分度计算:
-
-```sql
-select count(distinct left(word,6))/count(id) from tb_name where 1; 
-```
-
-目标是用最小的空间尽可能提高索引的效率。
-
-#### 1.31) 当字段名与MySQL保留字冲突的解决办法
-
-加上反引号 ` , 不过最好是在建表的时候就注意到这一点。
-
-#### 1.32) 查找my.cnf配置文件
-
-如果当您遇到修改MySQL配置之后没有生效，且伴有灵异情况的时候, 查看一下my.cnf配置文件加载的对不对吧. 下面的指令会告诉你你可能会碰到的坑:
-
-```
-/opt/lampp/bin/mysql --help | grep my.cnf
-```
-
-类似的问题可以想一下php.ini文件加载顺序造成的问题, 查看:
-
-```
-/opt/lampp/bin/php -r "phpinfo();" | grep "php.ini"
-```
-
-#### 1.33) 配置优化
-
-- [优化 Azure Linux VM 上的 MySQL 性能](https://docs.azure.cn/zh-cn/virtual-machines/linux/classic/optimize-mysql)
+[MySQL](http://note.youdao.com/noteshare?id=c85dca8670670d4f66d8fdc54ec44637) / Redis 因内容较多，该为独立文档维护。
 
 ### 2) 异步处理
 
@@ -702,7 +485,13 @@ AMQP（Advanced Message Queuing Protocol），一个标准的高级消息队列�
 ### 3) 认证鉴权
 
 #### 3.1) Session
+
+- Session在并发场景下的问题
+
 #### 3.2) JWT
+
+- 潜在的问题
+
 #### 3.3) OAuth2
 #### 3.4) 浏览器指纹
 
@@ -1058,8 +847,6 @@ Wordpress中应用
 - [PHP标准规范](https://psr.phphub.org/)
 - [PHP之道](http://laravel-china.github.io/php-the-right-way/)
 - [PHP非阻塞实现方法](https://www.awaimai.com/660.html)
-- [MySQL批量修改](https://www.awaimai.com/2103.html)
 - [在PHP中使用协程实现多任务调度](http://www.laruence.com/2015/05/28/3038.html)
 - [PDO查询超时设置方法](https://www.mudoom.com/blog/2017/07/30/pdo%EF%BC%88mysql%E9%A9%B1%E5%8A%A8%EF%BC%89%E6%9F%A5%E8%AF%A2%E8%B6%85%E6%97%B6%E8%AE%BE%E7%BD%AE%E6%96%B9%E6%B3%95/)
 - [Choosing a MySQL PHP drivers](http://php.net/manual/en/mysqlinfo.api.choosing.php)
-- [我必须得告诉大家的MySQL优化原理](https://www.jianshu.com/p/d7665192aaaf)
